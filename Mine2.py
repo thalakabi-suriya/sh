@@ -498,5 +498,215 @@ summary_sentences = heapq.nlargest(3, sent_scores, key=sent_scores.get)
 summary = " ".join(summary_sentences)
 
 print("🔹 Extraction-based Summary:\n", summary)
+
+lemma : 
+
+from nltk.stem import PorterStemmer, LancasterStemmer, SnowballStemmer
+
+from nltk.stem import WordNetLemmatizer
+
+from textblob import Word
+
+from tabulate import tabulate
+
+porter_stemmer = PorterStemmer()
+
+lancaster_stemmer = LancasterStemmer()
+
+snowball_stemmer = SnowballStemmer("english")
+
+lemmatizer = WordNetLemmatizer()
+
+words = [
+
+ "Run", "Running", "Runs", "Ran", "Runner",
+
+ "Runningly", "Rerun", "Overrunning", "Unrunnable",
+  "Outran", "Misrun"
+
+]
+
+results = []
+
+for word in words:
+
+ lower_word = word.lower()
+
+ results.append([
+
+ word,
+
+ porter_stemmer.stem(lower_word),
+
+ lancaster_stemmer.stem(lower_word),
+
+ snowball_stemmer.stem(lower_word),
+
+ lemmatizer.lemmatize(lower_word, pos='v'), # Lemmatization as verb
+
+ lemmatizer.lemmatize(lower_word, pos='n'), # Lemmatization as noun
+
+ Word(lower_word).lemmatize("v"), # TextBlob lemmatization (verb)
+
+ Word(lower_word).lemmatize("n") # TextBlob lemmatization (noun)
+
+ ])
+
+headers = ["Original", "Porter", "Lancaster", "Snowball", "WN Lemma (V)", "WN Lemma (N)", 
+
+"TextBlob (V)", "TextBlob (N)"]
+
+print(tabulate(results, headers=headers, tablefmt="grid"))
+
+
+import nltk
+
+from nltk.stem import SnowballStemmer, LancasterStemmer, RegexpStemmer, 
+
+WordNetLemmatizer
+
+nltk.download('wordnet')
+
+nltk.download('omw-1.4')
+
+nltk.download('punkt')
+
+words = ["jumping", "happier", "easily", "babies", "running", "mice", "teeth", "caring", 
+
+"stronger"]
+
+snowball = SnowballStemmer("english")
+
+lancaster = LancasterStemmer()
+
+regexp = RegexpStemmer(r"ing$|ed$|es$", min=4)
+
+lemmatizer = WordNetLemmatizer()
+
+snowball_stems = [snowball.stem(word) for word in words]
+
+lancaster_stems = [lancaster.stem(word) for word in words]regexp_stems = [regexp.stem(word) for word in words] 
+
+lemmatized_nouns = [lemmatizer.lemmatize(word, pos='n') for word in words]
+
+lemmatized_verbs = [lemmatizer.lemmatize(word, pos='v') for word in words]
+
+lemmatized_adjectives = [lemmatizer.lemmatize(word, pos='a') for word in words]
+
+print(f"{'Word':<12}{'Snowball':<12}{'Lancaster':<12}{'Regexp':<12}{'Lemma 
+
+(Noun)':<15}{'Lemma (Verb)':<15}{'Lemma (Adj.)':<15}")
+
+print("-" * 95)
+
+for i in range(len(words)):
+
+print(f"{words[i]:<12}{snowball_stems[i]:<12}{lancaster_stems[i]:<12}{regexp_stem
+
+s[i]:<12}{lemmatized_nouns[i]:<15}{lemmatized_verbs[i]:<15}{lemmatized_adjectives
+
+[i]:<15}")
+
+parse tree :
+
+import nltk
+
+from nltk import CFG
+
+import matplotlib.pyplot as plt
+
+from nltk.tree import Tree
+
+grammar = CFG.fromstring("""
+
+ S -> NP VP
+
+ NP -> Det N
+
+ VP -> V NP
+
+ Det -> 'the'
+
+ N -> 'dog' | 'cat'
+
+ V -> 'chased' | 'saw'
+
+""")
+
+parser = nltk.ChartParser(grammar)
+
+sentence = ['the', 'cat', 'saw', 'the', 'dog']
+
+for tree in parser.parse(sentence):
+
+ print(tree.pretty_print())
+
+
+
+# Define the grammar rules properly
+grammar = {
+    'S': [['NP', 'VP']],
+    'NP': [['Det', 'Nom']],
+    'VP': [['V', 'NP']],
+    'Nom': [['Adj', 'Nom'], ['N']],
+    'Det': [['the']],
+    'Adj': [['little'], ['angry'], ['frightened']],
+    'N': [['squirrel'], ['bear']],
+    'V': [['chased']]
+}
+
+# Tokenized input sentence
+sentence = "the angry bear chased the frightened little squirrel".split()
+index = 0  # Global index to track the current word
+
+
+# Recursive parse function
+def parse(symbol):
+    global index
+    # Terminal
+    if symbol not in grammar:
+        if index < len(sentence) and sentence[index] == symbol:
+            node = (symbol,)
+            index += 1
+            return node
+        else:
+            return None
+    # Non-terminal
+    for rule in grammar[symbol]:
+        saved_index = index
+        children = []
+        for part in rule:
+            result = parse(part)
+            if result is None:
+                index = saved_index
+                break
+            children.append(result)
+        else:
+            return (symbol, children)
+    return None
+
+
+# Helper to print parse tree
+def print_tree(node, indent=0):
+    if isinstance(node, tuple):
+        if len(node) == 1:
+            print('  ' * indent + node[0])
+        else:
+            print('  ' * indent + node[0])
+            for child in node[1]:
+                print_tree(child, indent + 1)
+
+
+# Start parsing from 'S'
+tree = parse('S')
+
+if tree and index == len(sentence):
+    print("✅ Parse successful! Here's the parse tree:\n")
+    print_tree(tree)
+else:
+    print("❌ Failed to parse the sentence.")
+
+
+
 ------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------
